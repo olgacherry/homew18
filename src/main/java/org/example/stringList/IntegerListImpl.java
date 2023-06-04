@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class IntegerListImpl implements IntegerList {
 
-        private final Integer[] storage;
+        private  Integer[] storage;
         private int size;
 
         public IntegerListImpl() {
@@ -19,7 +19,7 @@ public class IntegerListImpl implements IntegerList {
 
         @Override
         public Integer add(Integer item) {
-            validateSize();
+            growIfNeeded();
             validateItem(item);
             storage[size++]= item;
             return item;
@@ -27,7 +27,7 @@ public class IntegerListImpl implements IntegerList {
 
         @Override
         public Integer add(int index, Integer item) {
-            validateSize();
+            growIfNeeded();
             validateItem(item);
             validateIndex(index);
             if(index==size){
@@ -149,25 +149,47 @@ public class IntegerListImpl implements IntegerList {
                 throw new StorageIsFoolException();
             }
         }
+        private void growIfNeeded(){
+            if(size==storage.length){
+                grow();
+            }
+        }
         private void validateIndex(int index){
             if(index<0||index>size){
                 throw new InvalidIndexException();
             }
         }
         private void sort(Integer[]arr){
-            int i = 1;
-            for(i=1; i<arr.length; i++){
-                int temp = arr[i];
-                while(i>0&&arr[i-1]>=temp){
-                    arr[i]=arr[i-1];
-                    i--;
-                }
-               arr[i]=temp;
-
-
+          quickSort(arr,0,arr.length-1);
+        }
+        private void quickSort(Integer[]arr,int begin, int end){
+            if(begin<end){
+                int partitionIndex = partition(arr,begin,end);
+                quickSort(arr,begin,partitionIndex-1);
+                quickSort(arr,partitionIndex+1, end);
             }
         }
-        private boolean binarySearch(Integer[]arr,Integer item){
+
+    private int partition(Integer[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = (begin - 1);
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+                swapElement(arr, i, j);
+            }
+        }
+        swapElement(arr, i + 1, end);
+        return i + 1;
+    }
+    private void swapElement(Integer[] arr, int i, int j) {
+            int temp = arr[i];
+            arr[i]= arr[j];
+            arr[j]= temp;
+    }
+
+
+    private boolean binarySearch(Integer[]arr,Integer item){
             int min = 0;
             int max = arr.length-1;
             while(min<=max){
@@ -183,6 +205,10 @@ public class IntegerListImpl implements IntegerList {
             }
             return false;
         }
+        private void grow(){
+            storage = Arrays.copyOf(storage,size+size/2);
+        }
     }
+
 
 
